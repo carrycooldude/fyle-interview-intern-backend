@@ -12,6 +12,7 @@ class GradeEnum(str, enum.Enum):
     B = 'B'
     C = 'C'
     D = 'D'
+    AB = 'AB'
 
 
 class AssignmentStateEnum(str, enum.Enum):
@@ -65,7 +66,12 @@ class Assignment(db.Model):
         assertions.assert_found(assignment, 'No assignment with this id was found')
         assertions.assert_valid(assignment.student_id == principal.student_id, 'This assignment belongs to some other student')
         assertions.assert_valid(assignment.content is not None, 'assignment with empty content cannot be submitted')
-        assertions.assert_valid(assignment.state == AssignmentStateEnum.DRAFT, 'This assignment cannot be submitted again')
+        assertions.assert_valid(assignment.state == AssignmentStateEnum.DRAFT, 'only a draft assignment can be submitted')
+        # assertions.assert_valid(teacher_id is not None, 'teacher_id cannot be empty')
+        # assertions.assert_valid(Teacher.get_by_id(teacher_id) is not None, 'No teacher with this id was found')
+        # assertions.assert_valid(assignment.teacher_id is None or assignment.teacher_id == teacher_id, 'This assignment cannot be submitted to this teacher')
+        assertions.assert_valid(assignment.grade is None, 'This assignment has already been graded')
+                                
 
 
         assignment.teacher_id = teacher_id

@@ -1,4 +1,5 @@
 from core import db
+from core.apis.responses import APIResponse
 from flask import Blueprint, jsonify, request
 from core.models.assignments import Assignment
 from core.models.assignments import AssignmentStateEnum
@@ -37,11 +38,12 @@ def grade_assignment(principal : Principal):
     grade = data.get('grade')
 
     assertions.assert_valid(assignment_id is not None, 'assignment id is required')
-    assertions.assert_valid(grade in [grade.value for grade in AssignmentStateEnum.__members__.values()], 'invalid grade')
+    assertions.assert_valid(grade in [not grade.value for grade in AssignmentStateEnum.__members__.values()], 'invalid grade')
 
     assignment = Assignment.get_by_id(assignment_id)
     if not assignment:
         return jsonify({'error': 'No assignment with this id was found'}), 404
+    
 
     assertions.assert_valid(assignment.teacher_id == principal.teacher_id, 'This assignment does not belong to this teacher')
     assertions.assert_valid(assignment.state == AssignmentStateEnum.SUBMITTED, 'This assignment cannot be graded')
@@ -60,3 +62,4 @@ def grade_assignment(principal : Principal):
                      'teacher_id': assignment.teacher_id}
 
     return jsonify({'data': response_data}), 200
+    #return APIResponse.respond(data=response_data, status_code=200)
